@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, createRef } from "react";
-import { Text, View, StyleSheet, Button, Dimensions } from "react-native";
+import { Text, View, StyleSheet, Button, Dimensions, Alert } from "react-native";
 import Constants from "expo-constants";
 
 // files
@@ -14,10 +14,11 @@ import * as tf from "@tensorflow/tfjs";
 import * as posenet from "@tensorflow-models/posenet";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as knn from "@tensorflow-models/knn-classifier";
+import * as Tensorset from "tensorset"
 
 // canvas
 import Canvas, { Path2D } from "react-native-canvas";
-import { tensor, Tensor3D } from "@tensorflow/tfjs";
+import { tensor, Tensor2D, Tensor3D } from "@tensorflow/tfjs";
 import { PosenetInput } from "@tensorflow-models/posenet/dist/types";
 
 
@@ -133,11 +134,15 @@ class MagicCamera extends React.Component<any, IState> {
 
     this.drawSkeleton(pose);
 
-    let tens = tf.tensor2d(pose.keypoints.map(x => [x.position.x, x.position.y]));
+    let tens = tf.tensor2d(pose.keypoints.map(x => [x.score, x.position.x, x.position.y]));
     let str = "learning...";
     if (this.state.learning > 0) {
       if (this.state.learning % 2 == 1) {
         this.state.classifier?.addExample(tens, this.state.learning); // int learning will be the label for our class
+        if (this.state.classifier?.getClassExampleCount()[this.state.learning + ""] >= 50) {
+          this.setState({ learning: this.state.learning + 1 });
+          console.log("done learning this class");
+        }
       } else {
         str = JSON.stringify(await this.state.classifier?.predictClass(tens, 5));
       }
@@ -250,34 +255,53 @@ class MagicCamera extends React.Component<any, IState> {
           <Canvas ref={this.handleCanvas} style={styles.canvas} />
         </View>
         <Button title="Log states" onPress={() => { console.log("========================" + JSON.stringify(this.state) + "========================"); }} />
-        <Button color={"#cc77cc"} title={this.state.learning % 2 == 0 ? `Start learning (${this.state.learning / 2} learned)` : `Learning class ${this.state.learning}`} onPress={() => this.setState({ learning: this.state.learning + 1 })} />
+        <Button color={"#cc77cc"} title={this.state.learning % 2 == 0 ? `Start learning (${this.state.learning / 2} learned)` : `Learning class ${this.state.learning}`} onPress={() => {
+          setTimeout(() => {
+            this.setState({ learning: this.state.learning + 1 })
+          }, 5000);
+        }} />
         <Button color={this.state.running ? "#ee5511" : "#33cc44"} title={`${this.state.running ? "Stop" : "Start"} animation`} onPress={this.state.running ? this.halt : this.start} />
         <Button color={this.state.learning % 2 == 0 ? "#0077cc" : "#dddddd"} onPress={() => {
           if (this.state.learning % 2 == 0 && this.state.learning > 0) {
             let path = fs.documentDirectory + `folder/class.json`;
             // @ts-ignore
-            let data = JSON.stringify(Object.entries(this.state.classifier?.getClassifierDataset()).map(([label, data]) => [label, Array.from(data.dataSync()), data.shape]));
-            console.log(data);
+            let data = Tensorset.stringify(originalClassifier.getClassifierDataset());
+            console.log("*****************************************************************")
+            try {
+              console.log(data)
+            } catch (e) {
+              console.log(e.message);
+            } finally {
+              for (var i = 0; i < data.length; i += 1000) {
+                console.log(data.substring(i, i + 1000));
+              }
+            }
+            /*
             fs.writeAsStringAsync(path, data, { encoding: fs.EncodingType.UTF8 }).then(() => {
               console.log("written to file!");
             });
+            */
           }
         }} title="Export Class" />
         <Button color={"#33cc44"} onPress={() => {
+          /*
           if (this.state.learning % 2 == 0) {
             let path = fs.documentDirectory + `folder/class.json`;
             fs.readAsStringAsync(path, { encoding: fs.EncodingType.UTF8 }).then((str) => {
               console.log(str)
             });
           }
+          */
         }} title="Import Class" />
         <Button color={"#333333"} onPress={() => {
+          /*
           // DANGEROUS!
           fs.deleteAsync(fs.documentDirectory + "folder", { idempotent: true }).then(() => {
             fs.makeDirectoryAsync(fs.documentDirectory + "folder").then(() => {
               console.log("classes cleared");
             });
           });
+          */
         }} title="Clear files" />
         <Text>{this.state.debugText}</Text>
       </View>
@@ -294,7 +318,7 @@ const styles = StyleSheet.create({
   },
   cameraView: {
     width: CAM_WIDTH,
-    height:CAM_HEIGHT
+    height: CAM_HEIGHT
   },
   canvas: {
     position: "absolute",
