@@ -56,23 +56,23 @@
         reader.onload = async () => {
 
           img.src = reader.result;
-          img.style.position = "absolute";
-          img.width = 600;
-          img.height = 800;
-          img.style.zIndex = 1;
           frame.appendChild(img);
-          canvas.style.position = "aboslute";
+          frame.appendChild(canvas);
+          img.style = "position: absolute; z-index: 1";
+          img.width = 1200;
+          img.height = 1600;
+          canvas.style = "position: absolute; z-index: 2";
           canvas.width = img.width;
           canvas.height = img.height;
-          canvas.style.zIndex = 2;
-          frame.appendChild(canvas);
+          console.log(canvas.style.position);
+
+          console.log(net);
 
           const pose = await net.estimateSinglePose(img, { flipHorizontal: true });
           console.log(pose);
 
           imgOutput.appendChild(frame);
           const ctx = canvas.getContext("2d");
-          console.log(ctx);
 
           for (var i = 0; i < pose.keypoints.length; i++) {
             const keypoint = pose.keypoints[i];
