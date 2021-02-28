@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, createRef } from "react";
-import { Text, View, StyleSheet, Button, Dimensions } from "react-native";
+import { Text, View, StyleSheet, Button, Dimensions, ImagePropTypes } from "react-native";
 import Constants from "expo-constants";
 
 // files
@@ -20,6 +20,13 @@ import * as knn from "@tensorflow-models/knn-classifier";
 import Canvas, { Path2D } from "react-native-canvas";
 import { tensor, Tensor3D } from "@tensorflow/tfjs";
 import { PosenetInput } from "@tensorflow-models/posenet/dist/types";
+
+import loadModel, {exercises} from "./ClassModelLoader";
+
+
+interface IProps {
+  exercise: number
+}
 
 
 interface IState {
@@ -44,10 +51,11 @@ const tensorDims = { width: 152, height: 200 };
 const TensorCamera = cameraWithTensors(Camera);
 
 
-class MagicCamera extends React.Component<any, IState> {
+class MagicCamera extends React.Component<IProps, IState> {
 
-  constructor(props) {
+  constructor(props: IProps) {
     super(props);
+    
     this.state = {
       frameworkReady: false,
       cameraReady: false,
@@ -114,6 +122,8 @@ class MagicCamera extends React.Component<any, IState> {
           return model;
         }),
         classifier: knn.create(),
+      }, () => {
+        loadModel(this.state.classifier, this.props.exercise);
       });
 
       this.setFrameworkReady(true);
