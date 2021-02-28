@@ -3,10 +3,12 @@ import { Text, View, StyleSheet, Button, Dimensions, Alert } from "react-native"
 import Constants from "expo-constants";
 
 // files
-import * as fs from 'expo-file-system';
+import * as fs from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 
 // camera
 import { cameraWithTensors } from "@tensorflow/tfjs-react-native";
+import Svg, { Circle, Rect, G, Line } from 'react-native-svg';
 import { Camera } from "expo-camera";
 
 // tensorflow
@@ -33,6 +35,7 @@ interface IState {
   classifier: knn.KNNClassifier | null,
   debugText: string,
   learning: number,
+  pose?: posenet.Pose,
   rafId: number
 }
 
@@ -56,6 +59,7 @@ class MagicCamera extends React.Component<any, IState> {
       canvas: null,
       ctx: null,
       classifier: null,
+      pose: null,
       learning: 0,
       rafId: 0,
       debugText: "Loading..."
@@ -96,6 +100,9 @@ class MagicCamera extends React.Component<any, IState> {
       const { status } = await Camera.requestPermissionsAsync();
       console.log(`permissions: ${status}`);
 
+      const { accessPrivileges } = await MediaLibrary.getPermissionsAsync();
+      console.log(`media lib permissions: ${accessPrivileges}`)
+
       // we must always wait for the Tensorflow API to be ready before any TF operation...
       await tf.ready();
       console.log("TF is ready");
@@ -132,7 +139,7 @@ class MagicCamera extends React.Component<any, IState> {
       return;
     }
 
-    this.drawSkeleton(pose);
+    this.setState({ pose });
 
     let tens = tf.tensor2d(pose.keypoints.map(x => [x.score, x.position.x, x.position.y]));
     let str = "learning...";
@@ -153,43 +160,46 @@ class MagicCamera extends React.Component<any, IState> {
     this.print(`Tensors: ${numTensors}\nLearning: ${this.state.learning} \nPose: ${str}`);
   }
 
+  renderPose() {
+    const MIN_KEYPOINT_SCORE = 0.2;
+    const { pose } = this.state;
+    if (pose != null && this.state.running) {
+      const keypoints = pose.keypoints
+        .filter(k => k.score > MIN_KEYPOINT_SCORE)
+        .map((k, i) => {
+          return <Circle
+            key={`skeletonkp_${i}`}
+            cx={k.position.x}
+            cy={k.position.y}
+            r='2'
+            strokeWidth='0'
+            fill='red'
+          />;
+        });
 
-  drawPoint = (path, x, y) => {
-    const x1 = (CAM_WIDTH / tensorDims.width) * x;
-    const y1 = (CAM_HEIGHT / tensorDims.height) * y;
-    path.arc(x1, y1, 8, 0, 2 * Math.PI);
-    path.closePath();
-  }
+      const adjacentKeypoints =
+        posenet.getAdjacentKeyPoints(pose.keypoints, MIN_KEYPOINT_SCORE);
 
+      const skeleton = adjacentKeypoints.map(([from, to], i) => {
+        return <Line
+          key={`skeletonls_${i}`}
+          x1={from.position.x}
+          y1={from.position.y}
+          x2={to.position.x}
+          y2={to.position.y}
+          stroke='green'
+          strokeWidth='1'
+        />;
+      });
 
-  drawSegment = (path, x1, y1, x2, y2) => {
-    const x3 = (CAM_WIDTH / tensorDims.width) * x1;
-    const y3 = (CAM_HEIGHT / tensorDims.height) * y1;
-    const x4 = (CAM_WIDTH / tensorDims.width) * x2;
-    const y4 = (CAM_HEIGHT / tensorDims.height) * y2;
-    path.moveTo(x3, y3);
-    path.lineTo(x4, y4);
-    path.closePath();
-  }
-
-
-  drawSkeleton = (pose) => {
-    let dots2d = new Path2D(this.state.canvas);
-    let lines2d = new Path2D(this.state.canvas);
-    const minPartConfidence = 0.1;
-    for (var i = 0; i < pose.keypoints.length; i++) {
-      const keypoint = pose.keypoints[i];
-      if (keypoint.score >= minPartConfidence) {
-        this.drawPoint(dots2d, keypoint.position.x, keypoint.position.y);
-      }
+      return <Svg height='100%' width='100%'
+        viewBox={`0 0 ${tensorDims.width} ${tensorDims.height}`}>
+        {skeleton}
+        {keypoints}
+      </Svg>;
+    } else {
+      return null;
     }
-    const adjacentKeyPoints = posenet.getAdjacentKeyPoints(pose.keypoints, minPartConfidence);
-    adjacentKeyPoints.forEach((keypoints) => {
-      this.drawSegment(lines2d, keypoints[0].position.x, keypoints[0].position.y, keypoints[1].position.x, keypoints[1].position.y);
-    });
-    this.state.ctx?.clearRect(0, 0, CAM_WIDTH, CAM_HEIGHT);
-    this.state.ctx?.fill(dots2d);
-    this.state.ctx?.stroke(lines2d);
   }
 
 
@@ -252,9 +262,10 @@ class MagicCamera extends React.Component<any, IState> {
             onReady={this.handleCameraStream}
             autorender={true}
           />
-          <Canvas ref={this.handleCanvas} style={styles.canvas} />
+          <View style={styles.modelResults}>
+            {this.renderPose()}
+          </View>
         </View>
-        <Button title="Log states" onPress={() => { console.log("========================" + JSON.stringify(this.state) + "========================"); }} />
         <Button color={"#cc77cc"} title={this.state.learning % 2 == 0 ? `Start learning (${this.state.learning / 2} learned)` : `Learning class ${this.state.learning}`} onPress={() => {
           setTimeout(() => {
             this.setState({ learning: this.state.learning + 1 })
@@ -263,24 +274,13 @@ class MagicCamera extends React.Component<any, IState> {
         <Button color={this.state.running ? "#ee5511" : "#33cc44"} title={`${this.state.running ? "Stop" : "Start"} animation`} onPress={this.state.running ? this.halt : this.start} />
         <Button color={this.state.learning % 2 == 0 ? "#0077cc" : "#dddddd"} onPress={() => {
           if (this.state.learning % 2 == 0 && this.state.learning > 0) {
-            let path = fs.documentDirectory + `folder/class.json`;
-            // @ts-ignore
-            let data = Tensorset.stringify(originalClassifier.getClassifierDataset());
-            console.log("*****************************************************************")
-            try {
-              console.log(data)
-            } catch (e) {
-              console.log(e.message);
-            } finally {
-              for (var i = 0; i < data.length; i += 1000) {
-                console.log(data.substring(i, i + 1000));
-              }
-            }
-            /*
-            fs.writeAsStringAsync(path, data, { encoding: fs.EncodingType.UTF8 }).then(() => {
+            let path = fs.documentDirectory + `class${this.state.learning / 2}.json`;
+            let data = Tensorset.stringify(this.state.classifier?.getClassifierDataset());
+            fs.writeAsStringAsync(path, data, { encoding: fs.EncodingType.UTF8 }).then(async () => {
               console.log("written to file!");
+              const asset = await MediaLibrary.createAssetAsync(path);
+              MediaLibrary.createAlbumAsync("TrAIner", asset);
             });
-            */
           }
         }} title="Export Class" />
         <Button color={"#33cc44"} onPress={() => {
@@ -320,15 +320,19 @@ const styles = StyleSheet.create({
     width: CAM_WIDTH,
     height: CAM_HEIGHT
   },
-  canvas: {
-    position: "absolute",
-    zIndex: 1
-  },
   camera: {
     position: "absolute",
     width: CAM_WIDTH,
     height: CAM_HEIGHT,
     zIndex: 0,
+  },
+  modelResults: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: CAM_WIDTH,
+    height: CAM_HEIGHT,
+    zIndex: 20,
   }
 });
 
