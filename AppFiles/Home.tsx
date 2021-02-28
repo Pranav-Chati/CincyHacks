@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { Component } from 'react';
 import { StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native';
-import { getData } from "../MagicCamera"
+import { getData, storeData } from "../MagicCamera"
 
 export default class Home extends Component<any, any> {
 
@@ -15,6 +15,7 @@ export default class Home extends Component<any, any> {
 
   focusListener: any;
   componentDidMount() {
+    storeData("stats", {0: 0, 1: 0, 2: 0});
     this.focusListener = this.props.navigation.addListener("focus", async () => {
       console.log("HOME MOUNTED!!!");
       this.setState({
