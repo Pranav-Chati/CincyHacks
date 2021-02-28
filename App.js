@@ -34,7 +34,7 @@ export default function App() {
           {props => <Workout exercise={exercises.DUMBBELLS} callback={Home.updateStats} />}
         </Stack.Screen>
         <Stack.Screen name="stats">
-          {props => <Stats txt="Squats: 2" />}
+          {props => <Stats />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

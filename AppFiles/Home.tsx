@@ -99,11 +99,16 @@ export default class Home extends Component<any, any> {
 
     return <View>
       <View style={stylesheets.header}>
-        <Text style={{fontSize: 24}}>Welcome, {this.state.name}</Text>
+        <Text style={{ fontSize: 24 }}>Welcome, {this.state.name}</Text>
         <Image resizeMode={"contain"} style={stylesheets.logo} source={require('../IconImageFiles/background.png')} />
       </View>
       <View style={stylesheets.rows}>
         <View style={stylesheets.row}>
+          <TouchableOpacity style={stylesheets.app_icon} onPress={() => { this.props.navigation.navigate("stats") }}>
+            <View style={stylesheets.view_app_icon}>
+              <Text>Stats</Text>
+            </View>
+          </TouchableOpacity>
           {/*Dumbbells*/}
           <TouchableOpacity style={stylesheets.app_icon} onPress={() => { this.props.navigation.navigate("dumbbells") }}>
             <View style={stylesheets.view_app_icon}>
