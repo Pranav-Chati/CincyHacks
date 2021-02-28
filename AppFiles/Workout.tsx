@@ -43,7 +43,7 @@ export default class Workout extends React.Component<any, any> {
 
   componentWillUnmount() {
     console.log(`unmounted ${this.state.reps}`);
-    this.props.callback(this.props.exercise, this.state.reps);
+    //this.props.callback(this.props.exercise, this.state.reps);
     /*
     switch (this.props.exercise) {
       case 0:

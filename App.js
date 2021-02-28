@@ -12,6 +12,7 @@ import Food from './AppFiles/Food'
 import MagicCamera from "./MagicCamera"
 import Workout from './AppFiles/Workout';
 import {excercises, exercises} from "./ClassModelLoader";
+import Stats from "./AppFiles/Stats"
 
 
 const Stack = createStackNavigator();
@@ -20,9 +21,9 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="login">
-        <Stack.Screen name="home" component={Home}></Stack.Screen>
-        <Stack.Screen name="login" component={Login}></Stack.Screen>
-        <Stack.Screen name="food" component={Food}></Stack.Screen>
+        <Stack.Screen name="home" component={Home} options={{title: "Home"}}></Stack.Screen>
+        <Stack.Screen name="login" component={Login} options={{title: "Login"}}></Stack.Screen>
+        <Stack.Screen name="food" component={Food} options={{title: "Nutrition Facts"}}></Stack.Screen>
         <Stack.Screen name="squats">
           {props => <Workout exercise={exercises.SQUATS} callback={Home.updateStats} />}
         </Stack.Screen>
@@ -31,6 +32,9 @@ export default function App() {
         </Stack.Screen>
         <Stack.Screen name="dumbbells">
           {props => <Workout exercise={exercises.DUMBBELLS} callback={Home.updateStats} />}
+        </Stack.Screen>
+        <Stack.Screen name="stats">
+          {props => <Stats txt="Squats: 2" />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

@@ -99,7 +99,7 @@ export default class Home extends Component<any, any> {
 
     return <View>
       <View style={stylesheets.header}>
-        <Text>Welcome, {this.state.name}</Text>
+        <Text style={{fontSize: 24}}>Welcome, {this.state.name}</Text>
         <Image resizeMode={"contain"} style={stylesheets.logo} source={require('../IconImageFiles/background.png')} />
       </View>
       <View style={stylesheets.rows}>
@@ -156,7 +156,7 @@ export default class Home extends Component<any, any> {
         </View>
       </View>
       <View style={stylesheets.footer}>
-        <TouchableOpacity style={stylesheets.food_icon}>
+        <TouchableOpacity style={stylesheets.food_icon} onPress={() => { this.props.navigation.navigate("food") }}>
           <View style={stylesheets.view_food_icon}>
             <Text style={{ fontSize: 30 }}>Nutrition Tracker</Text>
           </View>

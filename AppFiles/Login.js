@@ -1,6 +1,6 @@
 import React, { Component, useState } from "react";
 import { StyleSheet, View, Text, Image, Button } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
+import { TextInput, TouchableOpacity } from "react-native-gesture-handler";
 import { storeData } from "../MagicCamera"
 
 function Login(props) {
@@ -8,22 +8,42 @@ function Login(props) {
 
     return (
         <View style={styles.container}>
-            <Text>Your name:</Text>
+            <Text style={{
+                fontSize: 24
+            }}>Your name:</Text>
             <TextInput onChangeText={text => {
                 setName(text);
-            }}></TextInput>
-            <Button onPress={() => {
+            }} style={{
+                borderWidth: 2,
+                borderRadius: 4,
+                borderColor: "#2196F3",
+                marginTop: 40,
+                marginBottom: 40,
+                height: 42,
+                padding: 10,
+                fontSize: 18
+            }} caretHidden={false}></TextInput>
+            <TouchableOpacity onPress={() => {
                 storeData("name", name);
                 props.navigation.navigate("home");
-            }
-            } title="GO" />
+            }} style={{
+                fontSize: 18,
+                backgroundColor: "#2196F3",
+                padding: 10
+            }} activeOpacity={0.6}
+            ><Text style={{
+                alignSelf: "center",
+                color: "white",
+                fontSize: 18
+            }}>Login</Text></TouchableOpacity>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        padding: 40
     },
     rect: {
         width: 375,
