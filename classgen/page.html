@@ -61,6 +61,18 @@
 
       for (const f of files) {
         const reader = new FileReader();
+
+        reader.onload = async () => {
+          const array = JSON.parse(reader.result).map(pose => pose.keypoints.map(x => [x.score, x.position.x, x.position.y]));
+          const a = document.createElement("a");
+          a.text = "Download";
+          a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(array));
+          a.download = `data.class`;
+          links.appendChild(a);
+          a.click();
+        }
+
+        /*
         const img = document.createElement("img");
         const canvas = document.createElement("canvas");
         const frame = document.createElement("div");
@@ -101,8 +113,9 @@
           });
 
         }
+        */
 
-        reader.readAsDataURL(f);
+        reader.readAsText(f);
       }
 
     });
