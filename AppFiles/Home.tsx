@@ -53,7 +53,8 @@ export default class Home extends Component<any, any> {
         paddingVertical: 16,
         borderRadius: 16,
         backgroundColor: '#ffffff',
-        marginRight: 10,
+        padding: 5,
+        margin: 4,
       },
       view_app_icon: { //the touchable
         alignItems: 'center',
@@ -66,14 +67,13 @@ export default class Home extends Component<any, any> {
       },
       rows: { //overall container
         backgroundColor: "#eeeeee",
-        paddingTop: 32,
+        paddingHorizontal: 10,
       },
 
       //top bar
       header: {
-        paddingVertical: 48,
-        paddingHorizontal: 16,
-        borderWidth: 1,
+        paddingTop: 40,
+        paddingHorizontal: 40,
 
       },
       logo: {
@@ -82,14 +82,14 @@ export default class Home extends Component<any, any> {
 
       //for all the stuff containing the food
       footer: {
-        paddingHorizontal: 16,
-        paddingBottom: 32,
+        paddingHorizontal: 40,
         backgroundColor: "#eeeeee",
       },
 
       food_icon: {
         backgroundColor: '#ffffff',
         borderRadius: 16,
+        padding: 10
       },
       view_food_icon: {
         alignItems: 'center',
@@ -106,14 +106,14 @@ export default class Home extends Component<any, any> {
         <View style={stylesheets.row}>
           <TouchableOpacity style={stylesheets.app_icon} onPress={() => { this.props.navigation.navigate("stats") }}>
             <View style={stylesheets.view_app_icon}>
-              <Text>Stats</Text>
+              <Text style={{alignSelf: 'center', fontSize: 18}}>View Your Stats</Text>
             </View>
           </TouchableOpacity>
           {/*Dumbbells*/}
           <TouchableOpacity style={stylesheets.app_icon} onPress={() => { this.props.navigation.navigate("dumbbells") }}>
             <View style={stylesheets.view_app_icon}>
               <Image source={require('../IconImageFiles/dumbbell_icon.png')} />
-              <Text>Dumbbells</Text>
+              <Text style={{alignSelf: 'center', fontSize: 16}}>Dumbbells</Text>
             </View>
           </TouchableOpacity>
 
@@ -121,7 +121,7 @@ export default class Home extends Component<any, any> {
           <TouchableOpacity style={stylesheets.app_icon} onPress={() => { this.props.navigation.navigate("jumpingjacks") }}>
             <View>
               <Image source={require('../IconImageFiles/jumpingjacks_icon.png')} />
-              <Text>Jumping Jacks</Text>
+              <Text style={{alignSelf: 'center', fontSize: 18}}>Jumping Jacks</Text>
             </View>
           </TouchableOpacity>
 
@@ -129,7 +129,7 @@ export default class Home extends Component<any, any> {
           <TouchableOpacity style={stylesheets.app_icon}>
             <View>
               <Image source={require('../IconImageFiles/plank_icon.png')} />
-              <Text>Plank</Text>
+              <Text style={{alignSelf: 'center', fontSize: 18}}>Planks</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -139,7 +139,7 @@ export default class Home extends Component<any, any> {
           <TouchableOpacity style={stylesheets.app_icon}>
             <View style={stylesheets.view_app_icon}>
               <Image source={require('../IconImageFiles/pushups_icon.png')} />
-              <Text>Push Ups</Text>
+              <Text style={{alignSelf: 'center', fontSize: 18}}>Push Ups</Text>
             </View>
           </TouchableOpacity>
 
@@ -147,7 +147,7 @@ export default class Home extends Component<any, any> {
           <TouchableOpacity style={stylesheets.app_icon}>
             <View style={stylesheets.view_app_icon}>
               <Image source={require('../IconImageFiles/situps_icon.png')} />
-              <Text>Sit Ups</Text>
+              <Text style={{alignSelf: 'center', fontSize: 18}}>Sit Ups</Text>
             </View>
           </TouchableOpacity>
 
@@ -155,7 +155,7 @@ export default class Home extends Component<any, any> {
           <TouchableOpacity style={stylesheets.app_icon} onPress={() => { this.props.navigation.navigate("squats") }}>
             <View style={stylesheets.view_app_icon}>
               <Image source={require('../IconImageFiles/squats_icon.png')} />
-              <Text>Squats</Text>
+              <Text style={{alignSelf: 'center', fontSize: 18}}>Squats</Text>
             </View>
           </TouchableOpacity>
         </View>

@@ -80,7 +80,7 @@ export default class Workout extends React.Component<any, any> {
     return (
       <View>
         <MagicCamera exercise={this.props.exercise} onKeyframeChange={this.handleKeyframeChange} />
-        <Text style={{ fontSize: 48 }}>{this.state.reps}</Text>
+        <Text style={{ fontSize: 60, alignSelf: "center" }}>{this.state.reps}</Text>
       </View>
     )
   }

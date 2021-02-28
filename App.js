@@ -24,16 +24,16 @@ export default function App() {
         <Stack.Screen name="home" component={Home} options={{title: "Home"}}></Stack.Screen>
         <Stack.Screen name="login" component={Login} options={{title: "Login"}}></Stack.Screen>
         <Stack.Screen name="food" component={Food} options={{title: "Nutrition Facts"}}></Stack.Screen>
-        <Stack.Screen name="squats">
-          {props => <Workout exercise={exercises.SQUATS} callback={Home.updateStats} />}
+        <Stack.Screen name="squats" options={{title: "Squat Training"}}>
+          {props => <Workout exercise={exercises.SQUATS} />}
         </Stack.Screen>
-        <Stack.Screen name="jumpingjacks">
+        <Stack.Screen name="jumpingjacks" options={{title: "Jumping Jacks Training"}}>
           {props => <Workout exercise={exercises.JUMPING_JACKS } callback={Home.updateStats} />}
         </Stack.Screen>
-        <Stack.Screen name="dumbbells">
+        <Stack.Screen name="dumbbells" options={{title: "Dumbbell Training"}}>
           {props => <Workout exercise={exercises.DUMBBELLS} callback={Home.updateStats} />}
         </Stack.Screen>
-        <Stack.Screen name="stats">
+        <Stack.Screen name="stats" options={{title: "Your Stats"}}>
           {props => <Stats />}
         </Stack.Screen>
       </Stack.Navigator>
