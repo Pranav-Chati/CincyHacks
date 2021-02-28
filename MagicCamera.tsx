@@ -98,7 +98,7 @@ class MagicCamera extends React.Component<IProps, IState> {
   }
 
 
-  print = (s) => {
+  print = (s: any) => {
     this.setState({ debugText: s });
   }
 
@@ -152,23 +152,18 @@ class MagicCamera extends React.Component<IProps, IState> {
       return;
     }
 
-    this.setState({ pose });
+    if (pose.keypoints.filter(val => val.score > 0.2).length >= 14) {
+      this.setState({ pose });
 
-    const tens = tf.tensor2d(pose.keypoints.map(x => [x.score, x.position.x, x.position.y]));
-    const prediction = await this.state.classifier?.predictClass(tens, 5);
+      const tens = tf.tensor2d(pose.keypoints.map(x => [x.score, x.position.x, x.position.y]));
+      const prediction = await this.state.classifier?.predictClass(tens, 5);
 
-    let mostLikelyPose = 0;
-    for (const i in prediction) {
-      if (prediction[i] > prediction[mostLikelyPose]) {
-        mostLikelyPose = Number(i);
-      }
+      this.setKeyframe(prediction.classIndex);
+
+      tens.dispose();
+
+      this.print(`Pose: ${JSON.stringify(prediction)}`);
     }
-
-    this.setKeyframe(mostLikelyPose);
-
-    tens.dispose();
-
-    this.print(`Pose: ${JSON.stringify(prediction)}`);
   }
 
   renderPose() {
@@ -239,14 +234,14 @@ class MagicCamera extends React.Component<IProps, IState> {
   }
 
 
-  handleCameraStream = async (iat) => {
+  handleCameraStream = async (iat: any) => {
     console.log("Camera loaded");
     this.setState({ imageAsTensors: iat });
     this.setCameraReady(true);
   }
 
 
-  handleCanvas = (can) => {
+  handleCanvas = (can: { height: number; width: number; getContext: (arg0: string) => any; }) => {
     if (can === null) return;
     can.height = CAM_HEIGHT;
     can.width = CAM_WIDTH;
@@ -277,7 +272,6 @@ class MagicCamera extends React.Component<IProps, IState> {
             {this.renderPose()}
           </View>
         </View>
-        <Text>{this.state.debugText}</Text>
       </View>
     );
   }
@@ -323,7 +317,7 @@ export default MagicCamera;
 
 // Stores the data; no need to worry about converting to strings ;)
 // (key needs to be string tho)
-const storeData = async (key, value) => {
+export const storeData = async (key: string, value) => {
   try {
     if (typeof value === "object") {
       value = "json|" + JSON.stringify(value);
@@ -340,14 +334,14 @@ const storeData = async (key, value) => {
 
 // Gets the data; no need to worry about converting from strings ;)
 // (key needs to be string tho)
-const getData = async (key) => {
+export const getData = async (key: string) => {
   try {
     var value = await AsyncStorage.getItem(key);
-    if (value !== null) {
+    if (value !== null && value !== undefined) {
       // value previously stored
       let type = value.split("|")[0];
       value = value.substr(type.length + 1);
-      let parsedValue;
+      let parsedValue: any;
       switch (type) {
         case "json":
           parsedValue = JSON.parse(value);
@@ -357,6 +351,9 @@ const getData = async (key) => {
           break;
         case "number":
           parsedValue = Number(value);
+          break;
+        case "string":
+          parsedValue = value;
           break;
       }
       return parsedValue;

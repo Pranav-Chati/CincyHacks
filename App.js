@@ -19,18 +19,18 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="home">
+      <Stack.Navigator initialRouteName="login">
         <Stack.Screen name="home" component={Home}></Stack.Screen>
         <Stack.Screen name="login" component={Login}></Stack.Screen>
         <Stack.Screen name="food" component={Food}></Stack.Screen>
         <Stack.Screen name="squats">
-          {props => <Workout exercise={exercises.SQUATS} />}
+          {props => <Workout exercise={exercises.SQUATS} callback={Home.updateStats} />}
         </Stack.Screen>
         <Stack.Screen name="jumpingjacks">
-          {props => <Workout exercise={exercises.JUMPING_JACKS} />}
+          {props => <Workout exercise={exercises.JUMPING_JACKS } callback={Home.updateStats} />}
         </Stack.Screen>
         <Stack.Screen name="dumbbells">
-          {props => <Workout exercise={exercises.DUMBBELLS} />}
+          {props => <Workout exercise={exercises.DUMBBELLS} callback={Home.updateStats} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

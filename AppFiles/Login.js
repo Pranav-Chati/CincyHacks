@@ -1,12 +1,22 @@
-import React, { Component } from "react";
-import { StyleSheet, View, Text, Image} from "react-native";
-
+import React, { Component, useState } from "react";
+import { StyleSheet, View, Text, Image, Button } from "react-native";
+import { TextInput } from "react-native-gesture-handler";
+import { storeData } from "../MagicCamera"
 
 function Login(props) {
+    const [name, setName] = useState("");
+
     return (
         <View style={styles.container}>
-            <Image source={require('../IconImageFiles/dumbbell_icon.png')} />
-            <AppIcons text={"Dumbbells"} image={"../IconImageFiles/dumbbell_icon.png"}/>
+            <Text>Your name:</Text>
+            <TextInput onChangeText={text => {
+                setName(text);
+            }}></TextInput>
+            <Button onPress={() => {
+                storeData("name", name);
+                props.navigation.navigate("home");
+            }
+            } title="GO" />
         </View>
     );
 }

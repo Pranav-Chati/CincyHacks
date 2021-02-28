@@ -1,8 +1,41 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { Component } from 'react';
 import { StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native';
+import { getData } from "../MagicCamera"
 
-export default class Home extends Component {
+export default class Home extends Component<any, any> {
+
+  constructor(pr) {
+    super(pr)
+    this.state = {
+      name: "",
+      stats: {}
+    }
+  }
+
+  focusListener: any;
+  componentDidMount() {
+    this.focusListener = this.props.navigation.addListener("focus", async () => {
+      console.log("HOME MOUNTED!!!");
+      this.setState({
+        name: await getData("name"), stats: (await getData("stats")) || {
+          0: 0,
+          1: 0,
+          2: 0
+        }
+      });
+    });
+  }
+
+  public updateStats = (ex, reps) => {
+    this.setState(old => ({
+      stats: () => {
+        old.stats[ex] += reps;
+        return old.stats;
+      }
+    }));
+  }
+
   render() {
     const { navigation } = this.props;
 
@@ -66,12 +99,13 @@ export default class Home extends Component {
 
     return <View>
       <View style={stylesheets.header}>
+        <Text>Welcome, {this.state.name}</Text>
         <Image resizeMode={"contain"} style={stylesheets.logo} source={require('../IconImageFiles/background.png')} />
       </View>
       <View style={stylesheets.rows}>
         <View style={stylesheets.row}>
           {/*Dumbbells*/}
-          <TouchableOpacity style={stylesheets.app_icon} onPress={() => {this.props.navigation.navigate("dumbbells")}}>
+          <TouchableOpacity style={stylesheets.app_icon} onPress={() => { this.props.navigation.navigate("dumbbells") }}>
             <View style={stylesheets.view_app_icon}>
               <Image source={require('../IconImageFiles/dumbbell_icon.png')} />
               <Text>Dumbbells</Text>
@@ -79,7 +113,7 @@ export default class Home extends Component {
           </TouchableOpacity>
 
           {/*Jumping Jacks*/}
-          <TouchableOpacity style={stylesheets.app_icon} onPress={() => {this.props.navigation.navigate("jumpingjacks")}}>
+          <TouchableOpacity style={stylesheets.app_icon} onPress={() => { this.props.navigation.navigate("jumpingjacks") }}>
             <View>
               <Image source={require('../IconImageFiles/jumpingjacks_icon.png')} />
               <Text>Jumping Jacks</Text>
@@ -113,7 +147,7 @@ export default class Home extends Component {
           </TouchableOpacity>
 
           {/*Squats*/}
-          <TouchableOpacity style={stylesheets.app_icon} onPress={() => {this.props.navigation.navigate("squats")}}>
+          <TouchableOpacity style={stylesheets.app_icon} onPress={() => { this.props.navigation.navigate("squats") }}>
             <View style={stylesheets.view_app_icon}>
               <Image source={require('../IconImageFiles/squats_icon.png')} />
               <Text>Squats</Text>
