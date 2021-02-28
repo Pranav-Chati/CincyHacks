@@ -38,4 +38,4 @@ def getleaderboard():
         t['score'] = i.score
         out.append(t)
     
-    return jsonify(sorted(out, key=lambda k: k['score']))
+    return jsonify(sorted(out, key=lambda k: k['score'], reverse=True))
