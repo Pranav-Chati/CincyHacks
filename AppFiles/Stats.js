@@ -3,11 +3,19 @@ import React, {useState} from "react";
 import {getData} from "../MagicCamera"
 
 export default function Stats() {
-    const [txt, setTxt] = useState("");
+    const [stats, setStats] = useState("");
     (async () => {
-        setTxt(JSON.stringify(await getData("stats")));
+        setStats(await getData("stats"));
     })();
+
     return (
-        <Text>{txt}</Text>
-    )
+        <View>
+        <Text style={{ fontSize: 24 }}>Squats: {this.stats[0]}</Text>
+        <Text style={{ fontSize: 24 }}>Jumping Jacks: {this.stats[1]}</Text>
+        <Text style={{ fontSize: 24 }}>Dumbbells: {this.stats[2]}</Text>
+        <Text style={{ fontSize: 24 }}>Push ups: 0</Text>
+        <Text style={{ fontSize: 24 }}>Sit ups: 0</Text>
+        <Text style={{ fontSize: 24 }}>Planks: 0</Text>
+        </View>
+    );
 }
