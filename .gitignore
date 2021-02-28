@@ -1,4 +1,4 @@
-classgen/img
+classgen/img*
 classgen/vid
 
 *.sqlite

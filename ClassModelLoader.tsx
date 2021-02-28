@@ -18,16 +18,17 @@ export default function loadModel(classifier: knn.KNNClassifier, exercise: numbe
   let relevantPoses;
   switch(exercise) {
   case exercises.SQUATS:
-    relevantPoses = [stand, squat];
+    relevantPoses = [stand.data, squat.data];
     break;
   case exercises.JUMPING_JACKS:
-    relevantPoses = [stand, jump];
+    relevantPoses = [stand.data, jump.data];
     break;
   case exercises.DUMBBELLS:
-    relevantPoses = [arms_down, left_up.concat(right_up), both_up];
+    relevantPoses = [arms_down.data, left_up.data.concat(right_up.data), both_up.data];
     break;
   }
   for (let i = 0; i < relevantPoses.length; i++) {
+    console.log(relevantPoses[i]);
     relevantPoses[i].map(arr => tf.tensor2d(arr)).forEach(tens => classifier.addExample(tens, i));
   }
 }
