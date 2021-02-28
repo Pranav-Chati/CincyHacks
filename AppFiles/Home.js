@@ -71,7 +71,7 @@ export default class Home extends Component {
       <View style={stylesheets.rows}>
         <View style={stylesheets.row}>
           {/*Dumbbells*/}
-          <TouchableOpacity style={stylesheets.app_icon}>
+          <TouchableOpacity style={stylesheets.app_icon} onPress={() => {this.props.navigation.navigate("dumbbells")}}>
             <View style={stylesheets.view_app_icon}>
               <Image source={require('../IconImageFiles/dumbbell_icon.png')} />
               <Text>Dumbbells</Text>
@@ -79,7 +79,7 @@ export default class Home extends Component {
           </TouchableOpacity>
 
           {/*Jumping Jacks*/}
-          <TouchableOpacity style={stylesheets.app_icon}>
+          <TouchableOpacity style={stylesheets.app_icon} onPress={() => {this.props.navigation.navigate("jumpingjacks")}}>
             <View>
               <Image source={require('../IconImageFiles/jumpingjacks_icon.png')} />
               <Text>Jumping Jacks</Text>
@@ -113,7 +113,7 @@ export default class Home extends Component {
           </TouchableOpacity>
 
           {/*Squats*/}
-          <TouchableOpacity style={stylesheets.app_icon}>
+          <TouchableOpacity style={stylesheets.app_icon} onPress={() => {this.props.navigation.navigate("squats")}}>
             <View style={stylesheets.view_app_icon}>
               <Image source={require('../IconImageFiles/squats_icon.png')} />
               <Text>Squats</Text>

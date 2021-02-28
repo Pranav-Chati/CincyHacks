@@ -6,7 +6,7 @@ import * as right_up from "./classmodels/right_up.json";
 import * as squat from "./classmodels/squat.json";
 import * as stand from "./classmodels/stand.json";
 import * as tf from "@tensorflow/tfjs";
-import * as knn from "@tensorflow-models/knn-classifier"
+import * as knn from "@tensorflow-models/knn-classifier";
 
 export const exercises = {
   SQUATS: 0,
@@ -28,7 +28,6 @@ export default function loadModel(classifier: knn.KNNClassifier, exercise: numbe
     break;
   }
   for (let i = 0; i < relevantPoses.length; i++) {
-    console.log(relevantPoses[i]);
     relevantPoses[i].map(arr => tf.tensor2d(arr)).forEach(tens => classifier.addExample(tens, i));
   }
 }

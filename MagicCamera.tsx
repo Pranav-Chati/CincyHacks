@@ -7,7 +7,7 @@ import * as fs from 'expo-file-system';
 
 // camera
 import { cameraWithTensors } from "@tensorflow/tfjs-react-native";
-import Svg, { Circle, Rect, G, Line} from 'react-native-svg';
+import Svg, { Circle, Rect, G, Line } from 'react-native-svg';
 import { Camera } from "expo-camera";
 
 // tensorflow
@@ -21,11 +21,12 @@ import Canvas, { Path2D } from "react-native-canvas";
 import { tensor, Tensor3D } from "@tensorflow/tfjs";
 import { PosenetInput } from "@tensorflow-models/posenet/dist/types";
 
-import loadModel, {exercises} from "./ClassModelLoader";
+import loadModel, { exercises } from "./ClassModelLoader";
 
 
 interface IProps {
-  exercise: number
+  exercise: number,
+  onKeyframeChange: (newKeyframe: number) => any
 }
 
 
@@ -41,7 +42,8 @@ interface IState {
   debugText: string,
   learning: number,
   pose?: posenet.Pose,
-  rafId: number
+  rafId: number,
+  keyframe: (number)
 }
 
 
@@ -55,7 +57,7 @@ class MagicCamera extends React.Component<IProps, IState> {
 
   constructor(props: IProps) {
     super(props);
-    
+
     this.state = {
       frameworkReady: false,
       cameraReady: false,
@@ -68,7 +70,8 @@ class MagicCamera extends React.Component<IProps, IState> {
       pose: null,
       learning: 0,
       rafId: 0,
-      debugText: "Loading..."
+      debugText: "Loading...",
+      keyframe: 0,
     }
   }
 
@@ -100,6 +103,11 @@ class MagicCamera extends React.Component<IProps, IState> {
   }
 
 
+  setKeyframe = (k: number) => {
+    this.setState({ keyframe: k }, () => { this.props.onKeyframeChange(this.state.keyframe) });
+  }
+
+
   componentDidMount() {
     (async () => {
 
@@ -123,7 +131,7 @@ class MagicCamera extends React.Component<IProps, IState> {
         }),
         classifier: knn.create(),
       }, () => {
-        loadModel(this.state.classifier, 0);
+        loadModel(this.state.classifier, this.props.exercise);
       });
 
       this.setFrameworkReady(true);
@@ -144,30 +152,32 @@ class MagicCamera extends React.Component<IProps, IState> {
       return;
     }
 
-    this.setState({pose});
+    this.setState({ pose });
 
-    let tens = tf.tensor2d(pose.keypoints.map(x => [x.score, x.position.x, x.position.y]));
-    let str = "learning...";
-    if (this.state.learning > 0) {
-      if (this.state.learning % 2 == 1) {
-        this.state.classifier?.addExample(tens, this.state.learning); // int learning will be the label for our class
-      } else {
-        str = JSON.stringify(await this.state.classifier?.predictClass(tens, 5));
+    const tens = tf.tensor2d(pose.keypoints.map(x => [x.score, x.position.x, x.position.y]));
+    const prediction = await this.state.classifier?.predictClass(tens, 5);
+
+    let mostLikelyPose = 0;
+    for (const i in prediction) {
+      if (prediction[i] > prediction[mostLikelyPose]) {
+        mostLikelyPose = Number(i);
       }
     }
-    tens.dispose();
-    let numTensors = tf.memory().numTensors;
 
-    this.print(`Tensors: ${numTensors}\nLearning: ${this.state.learning} \nPose: ${str}`);
+    this.setKeyframe(mostLikelyPose);
+
+    tens.dispose();
+
+    this.print(`Pose: ${JSON.stringify(prediction)}`);
   }
 
   renderPose() {
     const MIN_KEYPOINT_SCORE = 0.2;
-    const {pose} = this.state;
+    const { pose } = this.state;
     if (pose != null && this.state.running) {
       const keypoints = pose.keypoints
         .filter(k => k.score > MIN_KEYPOINT_SCORE)
-        .map((k,i) => {
+        .map((k, i) => {
           return <Circle
             key={`skeletonkp_${i}`}
             cx={k.position.x}
@@ -195,9 +205,9 @@ class MagicCamera extends React.Component<IProps, IState> {
 
       return <Svg height='100%' width='100%'
         viewBox={`0 0 ${tensorDims.width} ${tensorDims.height}`}>
-          {skeleton}
-          {keypoints}
-        </Svg>;
+        {skeleton}
+        {keypoints}
+      </Svg>;
     } else {
       return null;
     }
@@ -265,38 +275,8 @@ class MagicCamera extends React.Component<IProps, IState> {
           />
           <View style={styles.modelResults}>
             {this.renderPose()}
-         </View>
+          </View>
         </View>
-        <Button title="Log states" onPress={() => { console.log("========================" + JSON.stringify(this.state) + "========================"); }} />
-        <Button color={"#cc77cc"} title={this.state.learning % 2 == 0 ? `Start learning (${this.state.learning / 2} learned)` : `Learning class ${this.state.learning}`} onPress={() => this.setState({ learning: this.state.learning + 1 })} />
-        <Button color={this.state.running ? "#ee5511" : "#33cc44"} title={`${this.state.running ? "Stop" : "Start"} animation`} onPress={this.state.running ? this.halt : this.start} />
-        <Button color={this.state.learning % 2 == 0 ? "#0077cc" : "#dddddd"} onPress={() => {
-          if (this.state.learning % 2 == 0 && this.state.learning > 0) {
-            let path = fs.documentDirectory + `folder/class.json`;
-            // @ts-ignore
-            let data = JSON.stringify(Object.entries(this.state.classifier?.getClassifierDataset()).map(([label, data]) => [label, Array.from(data.dataSync()), data.shape]));
-            console.log(data);
-            fs.writeAsStringAsync(path, data, { encoding: fs.EncodingType.UTF8 }).then(() => {
-              console.log("written to file!");
-            });
-          }
-        }} title="Export Class" />
-        <Button color={"#33cc44"} onPress={() => {
-          if (this.state.learning % 2 == 0) {
-            let path = fs.documentDirectory + `folder/class.json`;
-            fs.readAsStringAsync(path, { encoding: fs.EncodingType.UTF8 }).then((str) => {
-              console.log(str)
-            });
-          }
-        }} title="Import Class" />
-        <Button color={"#333333"} onPress={() => {
-          // DANGEROUS!
-          fs.deleteAsync(fs.documentDirectory + "folder", { idempotent: true }).then(() => {
-            fs.makeDirectoryAsync(fs.documentDirectory + "folder").then(() => {
-              console.log("classes cleared");
-            });
-          });
-        }} title="Clear files" />
         <Text>{this.state.debugText}</Text>
       </View>
     );
@@ -312,7 +292,7 @@ const styles = StyleSheet.create({
   },
   cameraView: {
     width: CAM_WIDTH,
-    height:CAM_HEIGHT
+    height: CAM_HEIGHT
   },
   canvas: {
     position: "absolute",
@@ -325,7 +305,7 @@ const styles = StyleSheet.create({
     zIndex: 0,
   },
   modelResults: {
-    position:'absolute',
+    position: 'absolute',
     left: 0,
     top: 0,
     width: CAM_WIDTH,
