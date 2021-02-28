@@ -1,6 +1,8 @@
 classgen/img
 classgen/vid
 
+*.sqlite
+
 # OSX
 #
 .DS_Store
@@ -65,3 +67,6 @@ buck-out/
 # Expo
 .expo/*
 web-build/
+
+# Api
+api/__pycache__
