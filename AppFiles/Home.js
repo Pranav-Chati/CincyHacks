@@ -1,50 +1,85 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import AppIcons from './AppIcons';
+import React, {Component} from 'react';
+import { StyleSheet, View, Image, Text, Button } from 'react-native';
 
-export default class Home extends React.Component {
-    constructor(props) {
-        super(props);
 
-    }
-
+export default class Home extends Component {
     render() {
-        console.log("stylesheets loaded");
         let stylesheets = StyleSheet.create({
             container: {
                 flex: 1,
-                backgroundColor: '#0b3972',
-                alignItems: 'center',
-                justifyContent: 'center',
+                backgroundColor: '#ffffff',
             },
-            navbar: {
+            app_icon: {
+                flex:1,
+                borderWidth:1,
+                width:'33%',
+                alignItems:'center',
+                justifyContent:'center',
+                paddingVertical: 16,
+            },
+            Row: {
+                flexDirection:'row',
+            },
+            Rows: {
 
             },
-            workouts: {
 
+            header: {
+                paddingVertical: 96,
+                paddingHorizontal: 16,
             }
         });
 
         return (
-            <View styles={stylesheets.container}>
-                <View style={styles.navbar}>
+            <View>
+                <View style={stylesheets.header}>
+                    <Text>
+                        trainer
+                    </Text>
+                </View>
+                <View style={stylesheets.Rows}>
+                    <View style={stylesheets.Row}>
+                        {/*Dumbbells*/}
+                        <View style={stylesheets.app_icon}>
+                            <Image source={require('../IconImageFiles/dumbbell_icon.png')}/>
+                            <Text>Dumbbells</Text>
+                        </View>
 
-                </View>
-                <View name={"WelcomeHeader"}>
+                        {/*Jumping Jacks*/}
+                        <View style={stylesheets.app_icon}>
+                            <Image source={require('../IconImageFiles/jumpingjacks_icon.png')} />
+                            <Text>Jumping Jacks</Text>
+                        </View>
 
+                        {/*Plank*/}
+                        <View style={stylesheets.app_icon}>
+                            <Image source={require('../IconImageFiles/plank_icon.png')} />
+                            <Text>Plank</Text>
+                        </View>
+                    </View>
+
+                    <View style={stylesheets.Row}>
+                        {/*Push Ups*/}
+                        <View style={stylesheets.app_icon}>
+                            <Image source={require('../IconImageFiles/pushups_icon.png')} />
+                            <Text>Push Ups</Text>
+                        </View>
+
+                        {/*Sit Ups*/}
+                        <View style={stylesheets.app_icon}>
+                            <Image source={require('../IconImageFiles/situps_icon.png')} />
+                            <Text>Sit Ups</Text>
+                        </View>
+
+                        {/*Squats*/}
+                        <View style={stylesheets.app_icon}>
+                            <Image source={require('../IconImageFiles/squats_icon.png')} />
+                            <Text>Squats</Text>
+                        </View>
+                    </View>
                 </View>
-                <View name={"Workouts"} styles={stylesheets.workouts}>
-                    <AppIcons text={"Dumbbells"} image={"./IconImageFiles/dumbbell_icon.png"}/>
-                    <AppIcons text={"Jumping Jacks"} image={"./IconImageFiles/jumpingjacks_icon.png"}/>
-                    <AppIcons text={"Plank"} image={"./IconImageFiles/plank_icon.png"}/>
-                    <AppIcons text={"Push Ups"} image={"./IconImageFiles/pushups_icon.png"}/>
-                    <AppIcons text={"Sit Ups"} image={"./IconImageFiles/situps_icon.png"}/>
-                    <AppIcons text={"Squats"} image={"./IconImageFiles/squats_icon.png"}/>
-                </View>
-                <View name={"Food"}>
-                    <AppIcons />
-                </View>
+
                 <StatusBar style="auto" />
             </View>
         );

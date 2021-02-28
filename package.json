@@ -42,6 +42,8 @@
     "@types/react-native": "~0.63.2",
     "babel-jest": "~25.2.6",
     "jest": "~25.2.6",
+    "prettier": "^2.2.1",
+    "react-native-grid-component": "^2.0.1",
     "react-test-renderer": "~16.13.1",
     "typescript": "~4.0.0"
   },
