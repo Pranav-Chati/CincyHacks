@@ -3,11 +3,12 @@ import { Text, View, StyleSheet, Button, Dimensions, Alert } from "react-native"
 import Constants from "expo-constants";
 
 // files
-import * as fs from 'expo-file-system';
+import * as fs from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 
 // camera
 import { cameraWithTensors } from "@tensorflow/tfjs-react-native";
-import Svg, { Circle, Rect, G, Line} from 'react-native-svg';
+import Svg, { Circle, Rect, G, Line } from 'react-native-svg';
 import { Camera } from "expo-camera";
 
 // tensorflow
@@ -15,7 +16,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as posenet from "@tensorflow-models/posenet";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as knn from "@tensorflow-models/knn-classifier";
-import * as Tensorset from "tensorset"
+import * as Tensorset from "tensorset";
 
 // canvas
 import Canvas, { Path2D } from "react-native-canvas";
@@ -99,6 +100,9 @@ class MagicCamera extends React.Component<any, IState> {
       const { status } = await Camera.requestPermissionsAsync();
       console.log(`permissions: ${status}`);
 
+      const { accessPrivileges } = await MediaLibrary.getPermissionsAsync();
+      console.log(`media lib permissions: ${accessPrivileges}`)
+
       // we must always wait for the Tensorflow API to be ready before any TF operation...
       await tf.ready();
       console.log("TF is ready");
@@ -135,7 +139,7 @@ class MagicCamera extends React.Component<any, IState> {
       return;
     }
 
-    this.setState({pose});
+    this.setState({ pose });
 
     let tens = tf.tensor2d(pose.keypoints.map(x => [x.score, x.position.x, x.position.y]));
     let str = "learning...";
@@ -158,11 +162,11 @@ class MagicCamera extends React.Component<any, IState> {
 
   renderPose() {
     const MIN_KEYPOINT_SCORE = 0.2;
-    const {pose} = this.state;
+    const { pose } = this.state;
     if (pose != null && this.state.running) {
       const keypoints = pose.keypoints
         .filter(k => k.score > MIN_KEYPOINT_SCORE)
-        .map((k,i) => {
+        .map((k, i) => {
           return <Circle
             key={`skeletonkp_${i}`}
             cx={k.position.x}
@@ -190,9 +194,9 @@ class MagicCamera extends React.Component<any, IState> {
 
       return <Svg height='100%' width='100%'
         viewBox={`0 0 ${tensorDims.width} ${tensorDims.height}`}>
-          {skeleton}
-          {keypoints}
-        </Svg>;
+        {skeleton}
+        {keypoints}
+      </Svg>;
     } else {
       return null;
     }
@@ -262,7 +266,6 @@ class MagicCamera extends React.Component<any, IState> {
             {this.renderPose()}
          </View>
         </View>
-        <Button title="Log states" onPress={() => { console.log("========================" + JSON.stringify(this.state) + "========================"); }} />
         <Button color={"#cc77cc"} title={this.state.learning % 2 == 0 ? `Start learning (${this.state.learning / 2} learned)` : `Learning class ${this.state.learning}`} onPress={() => {
           setTimeout(() => {
             this.setState({ learning: this.state.learning + 1 })
@@ -271,24 +274,13 @@ class MagicCamera extends React.Component<any, IState> {
         <Button color={this.state.running ? "#ee5511" : "#33cc44"} title={`${this.state.running ? "Stop" : "Start"} animation`} onPress={this.state.running ? this.halt : this.start} />
         <Button color={this.state.learning % 2 == 0 ? "#0077cc" : "#dddddd"} onPress={() => {
           if (this.state.learning % 2 == 0 && this.state.learning > 0) {
-            let path = fs.documentDirectory + `folder/class.json`;
-            // @ts-ignore
-            let data = Tensorset.stringify(originalClassifier.getClassifierDataset());
-            console.log("*****************************************************************")
-            try {
-              console.log(data)
-            } catch (e) {
-              console.log(e.message);
-            } finally {
-              for (var i = 0; i < data.length; i += 1000) {
-                console.log(data.substring(i, i + 1000));
-              }
-            }
-            /*
-            fs.writeAsStringAsync(path, data, { encoding: fs.EncodingType.UTF8 }).then(() => {
+            let path = fs.documentDirectory + `class${this.state.learning / 2}.json`;
+            let data = Tensorset.stringify(this.state.classifier?.getClassifierDataset());
+            fs.writeAsStringAsync(path, data, { encoding: fs.EncodingType.UTF8 }).then(async () => {
               console.log("written to file!");
+              const asset = await MediaLibrary.createAssetAsync(path);
+              MediaLibrary.createAlbumAsync("TrAIner", asset);
             });
-            */
           }
         }} title="Export Class" />
         <Button color={"#33cc44"} onPress={() => {
@@ -327,10 +319,6 @@ const styles = StyleSheet.create({
   cameraView: {
     width: CAM_WIDTH,
     height: CAM_HEIGHT
-  },
-  canvas: {
-    position: "absolute",
-    zIndex: 1
   },
   camera: {
     position: "absolute",
