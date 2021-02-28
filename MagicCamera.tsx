@@ -123,7 +123,7 @@ class MagicCamera extends React.Component<IProps, IState> {
         }),
         classifier: knn.create(),
       }, () => {
-        loadModel(this.state.classifier, this.props.exercise);
+        loadModel(this.state.classifier, 0);
       });
 
       this.setFrameworkReady(true);
