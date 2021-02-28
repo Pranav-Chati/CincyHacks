@@ -9,7 +9,7 @@ export default function Stats() {
     })();
 
     return (
-        <View>
+        <View style={{ padding: 40 }}>
         <Text style={{ fontSize: 24 }}>Squats: {this.stats[0]}</Text>
         <Text style={{ fontSize: 24 }}>Jumping Jacks: {this.stats[1]}</Text>
         <Text style={{ fontSize: 24 }}>Dumbbells: {this.stats[2]}</Text>
