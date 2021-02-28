@@ -1,29 +1,12 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text } from "react-native";
-import {Image} from "react-native-web";
+import { StyleSheet, View, Text, Image} from "react-native";
+
 
 function Login(props) {
     return (
         <View style={styles.container}>
-            {/*Nav Bar*/}
-            <View style={styles.rect}></View>
-
-
-            <View style={styles.rect2}></View>{/*welcome*/}
-            <View style={styles.rect3Row}> {/* First row of workouts*/}
-                <View style={styles.rect3}></View>
-                <View style={styles.rect4}></View>
-                <View style={styles.rect5}></View>
-            </View>
-            <View style={styles.rect6Row}>{/* Second row of workouts*/}
-                <View style={styles.rect6}></View>
-                <View style={styles.rect7}></View>
-                <View style={styles.rect8}></View>
-            </View>
-            <View style={styles.rect9}> {/*FOOD*/}
-                <Text style={styles.food}>Food</Text>
-                <Image source={require('./IconImageFiles/dumbbell_icon.png')} />
-            </View>
+            <Image source={require('../IconImageFiles/dumbbell_icon.png')} />
+            <AppIcons text={"Dumbbells"} image={"../IconImageFiles/dumbbell_icon.png"}/>
         </View>
     );
 }
