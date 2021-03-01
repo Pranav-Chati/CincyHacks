@@ -1,0 +1,12 @@
+{
+  "name": "cincyhacks",
+  "displayName": "cincyhacks",
+  "expo": {
+    "name": "cincyhacks",
+    "slug": "cincyhacks",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "classmodels/*"
+    ]
+  }
+}

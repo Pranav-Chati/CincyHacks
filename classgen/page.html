@@ -1,0 +1,135 @@
+<html>
+
+<head>
+  <!-- Load TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <!-- Load Posenet -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
+</head>
+
+<body>
+  <input type="file" id="filePicker" name="files" multiple />
+  <button id="submit">Submit</button>
+  <button id="clear">Clear</button>
+  <button id="download">Download</button>
+  <div id="links"></div>
+  <div id="imgOutput"></div>
+</body>
+<!-- Place your code in the script tag below. You can also use an external .js file -->
+<script>
+  (async () => {
+    const filePicker = document.getElementById("filePicker");
+    const imgOutput = document.getElementById("imgOutput");
+    const links = document.getElementById("links");
+    const net = await posenet.load({
+      architecture: "MobileNetV1",
+      outputStride: 8,
+      multiplier: 0.75,
+      inputResolution: { width: 152, height: 200 },
+      quantBytes: 2
+    });
+
+    const minPartConfidence = 0.2;
+
+
+    function drawPoint(ctx, x, y, radius = 3, color = "chartreuse") {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, 2 * Math.PI);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+
+    function drawSegment(ctx, [ax, ay], [bx, by], lineWidth = 3, color = "chartreuse") {
+      ctx.beginPath();
+      ctx.moveTo(ax, ay);
+      ctx.lineTo(bx, by);
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = color;
+      ctx.stroke();
+    }
+
+    let poseClasses = [];
+
+    document.getElementById("clear").addEventListener("click", () => {
+      imgOutput.innerHTML = "";
+      links.innerHTML = "";
+      poseClasses = [];
+    });
+
+    document.getElementById("submit").addEventListener("click", async () => {
+      const files = filePicker.files;
+
+      for (const f of files) {
+        const reader = new FileReader();
+
+        /*
+        reader.onload = async () => {
+          const array = JSON.parse(reader.result).map(pose => pose.keypoints.map(x => [x.score, x.position.x, x.position.y]));
+          const a = document.createElement("a");
+          a.text = "Download";
+          a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(array));
+          a.download = `data.class`;
+          links.appendChild(a);
+          a.click();
+        }
+        */
+
+        const img = document.createElement("img");
+        const canvas = document.createElement("canvas");
+        const frame = document.createElement("div");
+        const a = document.createElement("a");
+
+        reader.onload = async () => {
+
+          frame.style = "position: relative; display: inline-block; width: 400px; height: 300px; margin: 10px";
+          img.src = reader.result;
+          img.style = "position: absolute; z-index: 1";
+          img.width = 400;
+          img.height = 300;
+          canvas.style = "position: absolute; z-index: 2";
+          canvas.width = img.width;
+          canvas.height = img.height;
+          frame.appendChild(img);
+          frame.appendChild(canvas);
+
+          const pose = await net.estimateSinglePose(img, { flipHorizontal: false });
+
+          poseClasses.push(pose);
+
+          imgOutput.appendChild(frame);
+          const ctx = canvas.getContext("2d");
+
+          for (var i = 0; i < pose.keypoints.length; i++) {
+            const keypoint = pose.keypoints[i];
+            if (keypoint.score < minPartConfidence) {
+              continue;
+            }
+            drawPoint(ctx, keypoint.position.x, keypoint.position.y);
+          }
+
+          const adjacentKeyPoints = posenet.getAdjacentKeyPoints(pose.keypoints, minPartConfidence);
+          adjacentKeyPoints.forEach((keypoints) => {
+            drawSegment(ctx, [keypoints[0].position.x, keypoints[0].position.y],
+              [keypoints[1].position.x, keypoints[1].position.y]);
+          });
+
+        }
+        
+
+        reader.readAsDataURL(f);
+      }
+
+    });
+
+    document.getElementById("download").addEventListener("click", () => {
+      const a = document.createElement("a");
+      a.text = "Download";
+      a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(poseClasses));
+      a.download = `data.json`;
+      links.appendChild(a);
+      a.click();
+    })
+  })();
+</script>
+
+</html>
